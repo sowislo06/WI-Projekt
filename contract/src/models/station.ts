@@ -3,11 +3,17 @@
  */
 
 import { Object, Property } from 'fabric-contract-api';
+import { Asset } from './asset';
+import { Category } from './category';
 
 @Object()
 export class Station {
 
     @Property()
     public name: string;
+
+
+   @Property()
+   public assets: any[];
 
 }

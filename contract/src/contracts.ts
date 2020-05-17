@@ -6,6 +6,7 @@ import { Context, Contract, Info, Returns, Transaction } from 'fabric-contract-a
 import { Asset } from './models/asset';
 import { Category } from './models/category';
 import { contracts } from '.';
+import { Station } from './models/station';
 
 @Info({title: 'Contracts', description: 'All Smart Contract' })
 export class Contracts extends Contract {
@@ -33,6 +34,7 @@ export class Contracts extends Contract {
         asset.name = name;
         asset.category = category;
         const buffer = Buffer.from(JSON.stringify(asset));
+
         await ctx.stub.putState(assetId, buffer);
     }
 
@@ -51,6 +53,7 @@ export class Contracts extends Contract {
 //END: ASSET
 
 //START: CATEGORY
+
 
     @Transaction(false)
     @Returns('Category')
@@ -82,7 +85,22 @@ export class Contracts extends Contract {
         const buffer = Buffer.from(JSON.stringify(category));
         await ctx.stub.putState(categoryId, buffer);
     }
-
 //END: CATEGORY
+
+//START: STATION
+
+    @Transaction()
+    public async createStation(ctx: Context, stationId: string, name: string, assetId: string): Promise<void> {
+
+        const asset = new Asset();
+
+        const station = new Station();
+        station.name = name;
+        station.assets.push(asset);
+        const buffer = Buffer.from(JSON.stringify(station));
+        await ctx.stub.putState(stationId, buffer);
+    }
+
+//END: STATION
 
 }
