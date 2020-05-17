@@ -14,6 +14,6 @@ export class Asset {
 
     @Property()
     public category: Category;
-    
+    //test
 
 }
