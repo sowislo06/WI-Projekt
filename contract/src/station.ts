@@ -12,8 +12,4 @@ export class Station {
     @Property()
     public name: string;
 
-
-   @Property()
-   public assets: any[];
-
 }
