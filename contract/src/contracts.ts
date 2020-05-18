@@ -3,10 +3,11 @@
  */
 
 import { Context, Contract, Info, Returns, Transaction } from 'fabric-contract-api';
-import { Asset } from './models/asset';
-import { Category } from './models/category';
+import { Asset } from './asset';
+import { Category } from './category';
 import { contracts } from '.';
-import { Station } from './models/station';
+import { Station } from './station';
+import { Activity } from './activity';
 
 @Info({title: 'Contracts', description: 'All Smart Contract' })
 export class Contracts extends Contract {
@@ -89,18 +90,78 @@ export class Contracts extends Contract {
 
 //START: STATION
 
-    @Transaction()
-    public async createStation(ctx: Context, stationId: string, name: string, assetId: string): Promise<void> {
+    @Transaction(false)
+    @Returns('boolean')
+    public async stationExcists(ctx: Context, stationId: string): Promise<boolean> {
+        const buffer = await ctx.stub.getState(stationId);
+        return (!!buffer && buffer.length > 0);
+    }
 
-        const asset = new Asset();
+
+    @Transaction(false)
+    @Returns('Station')
+    public async readStation(ctx: Context, stationId: string): Promise<Station> {
+        const exists = await this.stationExcists(ctx, stationId);
+        if (!exists) {
+            throw new Error(`The station ${stationId} does not exist`);
+        }
+        const buffer = await ctx.stub.getState(stationId);
+        const station = JSON.parse(buffer.toString()) as Station;
+        return station;
+    }
+
+    @Transaction()
+    public async createStation(ctx: Context, stationId: string, name: string): Promise<void> {
 
         const station = new Station();
         station.name = name;
-        station.assets.push(asset);
         const buffer = Buffer.from(JSON.stringify(station));
         await ctx.stub.putState(stationId, buffer);
     }
 
 //END: STATION
 
+//START: Activity
+
+    @Transaction(false)
+    @Returns('boolean')
+    public async activityExists(ctx: Context, activityId: string): Promise<boolean> {
+        const buffer = await ctx.stub.getState(activityId);
+        return (!!buffer && buffer.length > 0);
+    }
+
+    @Transaction(false)
+    @Returns('Activity')
+    public async readActivity(ctx: Context, activityId: string): Promise<Activity> {
+        const exists = await this.activityExists(ctx, activityId);
+        if (!exists) {
+            throw new Error(`The activity ${activityId} does not exist`);
+        }
+        const buffer = await ctx.stub.getState(activityId);
+        const activity = JSON.parse(buffer.toString()) as Activity;
+        return activity;
+    }
+
+    @Transaction()
+    public async createActivity(ctx: Context, activityId: string, name: string, assetId: string, stationId: string): Promise<void> {
+        
+        const existsActivity = await this.activityExists(ctx, activityId);
+        if (existsActivity) {
+            throw new Error(`The activity ${activityId} already exists`);
+        }
+
+        const activity = new Activity();
+        const asset = await this.readAsset(ctx, assetId);
+        const station = await this.readStation(ctx, stationId);
+
+
+        activity.name = name;
+        activity.asset = asset;
+        activity.station = station;
+        const buffer = Buffer.from(JSON.stringify(activity));
+
+        await ctx.stub.putState(activityId, buffer);
+    }
+
+//END: STATION
 }
