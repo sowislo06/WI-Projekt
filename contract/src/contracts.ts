@@ -23,7 +23,7 @@ export class Contracts extends Contract {
     }
 
     @Transaction()
-    public async createAsset(ctx: Context, assetId: string, name: string, categoryId: string): Promise<void> {
+    public async createAsset(ctx: Context, assetId: string, name: string, categoryId: string, stationId: string): Promise<void> {
         const existsAsset = await this.assetExists(ctx, assetId);
         if (existsAsset) {
             throw new Error(`The my asset ${assetId} already exists`);
@@ -31,9 +31,11 @@ export class Contracts extends Contract {
 
         const asset = new Asset();
         const category = await this.readCategory(ctx, categoryId);
+        const station = await this.readStation(ctx, stationId);
 
         asset.name = name;
         asset.category = category;
+        asset.station = station;
         const buffer = Buffer.from(JSON.stringify(asset));
 
         await ctx.stub.putState(assetId, buffer);
@@ -49,6 +51,24 @@ export class Contracts extends Contract {
         const buffer = await ctx.stub.getState(assetId);
         const myAsset = JSON.parse(buffer.toString()) as Asset;
         return myAsset;
+    }
+
+    @Transaction()
+    public async updateStationInAsset(ctx: Context, assetId: string, newStation: string): Promise<void> {
+        const exists = await this.assetExists(ctx, assetId);
+        if (!exists) {
+            throw new Error(`The asset ${assetId} does not exist`);
+        }
+        //Instanz der neuen Station und des Assets holen
+        const station = await this.readStation(ctx, newStation);
+        const asset = await this.readAsset(ctx, assetId);
+        const newAsset = new Asset();
+
+        newAsset.category = asset.category;
+        newAsset.station = station;
+        newAsset.name = asset.name; 
+        const buffer = Buffer.from(JSON.stringify(newAsset));
+        await ctx.stub.putState(assetId, buffer);
     }
 
 //END: ASSET
@@ -142,7 +162,7 @@ export class Contracts extends Contract {
         return activity;
     }
 
-    @Transaction()
+
     public async createActivity(ctx: Context, activityId: string, name: string, assetId: string, stationId: string): Promise<void> {
         
         const existsActivity = await this.activityExists(ctx, activityId);
@@ -153,6 +173,9 @@ export class Contracts extends Contract {
         const activity = new Activity();
         const asset = await this.readAsset(ctx, assetId);
         const station = await this.readStation(ctx, stationId);
+        
+        //Aktuallisiert die Station in der Instanz des Assets
+        await this.updateStationInAsset(ctx, assetId, stationId);
 
 
         activity.name = name;
@@ -161,6 +184,47 @@ export class Contracts extends Contract {
         const buffer = Buffer.from(JSON.stringify(activity));
 
         await ctx.stub.putState(activityId, buffer);
+    }
+
+    @Transaction()
+    public async queryAssetsFromStation(ctx: Context, stationId: string): Promise<string> { 
+        const startKey = 'ASSET0';
+        const endKey = 'ASSET999';
+
+        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        const allResults = [];
+        while (true) {
+            const res = await iterator.next();
+            
+            const stationName = res.value.getValue().toString('utf8');
+            const station = await this.readStation(ctx, stationId);
+
+            //Bedingung: Station des Assets stimmt mit der aus dem Parameter überein
+            if(stationName.includes(station.name)){
+                if (res.value && res.value.value.toString()) {
+                    console.log(res.value.value.toString('utf8'));
+                
+    
+                    const Key = res.value.key;
+                    let Record;
+                    try {
+                        Record = JSON.parse(res.value.value.toString('utf8'));
+                    } catch (err) {
+                        console.log(err);
+                        Record = res.value.value.toString('utf8');
+                    }
+                    allResults.push({ Key, Record });
+                }
+
+            }
+            if (res.done) {
+                console.log('end of data');
+                await iterator.close();
+                console.info(allResults);
+                return JSON.stringify(allResults);
+            }
+        }
     }
 
 //END: STATION

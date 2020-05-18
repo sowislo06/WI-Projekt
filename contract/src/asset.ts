@@ -15,4 +15,7 @@ export class Asset {
     @Property()
     public category: Category;
 
+    @Property()
+    public station: Station;
+
 }
