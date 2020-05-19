@@ -28,7 +28,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.query = void 0;
 const fabric_network_1 = require("fabric-network");
 const path = __importStar(require("path"));
 function main() {
@@ -48,9 +47,9 @@ function main() {
             const network = yield gateway.getNetwork('mychannel');
             // Get the contract from the network.
             const contract = network.getContract('contract');
-            // Evaluate the specified transaction.
-            const result = yield contract.evaluateTransaction('readStation', 'S1');
-            console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+            // Submit the specified transaction.
+            //await contract.submitTransaction('createAsset', '002', 'Night Watch');
+            console.log(`Transaction has been submitted`);
             // Disconnect from the gateway.
             yield gateway.disconnect();
         }
@@ -61,36 +60,4 @@ function main() {
     });
 }
 main();
-function query() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            // Create a new file system based wallet for managing identities.
-            const walletPath = path.join(process.cwd(), 'Org1Wallet');
-            const wallet = new fabric_network_1.FileSystemWallet(walletPath);
-            console.log(`Wallet path: ${walletPath}`);
-            // Create a new gateway for connecting to our peer node.
-            const gateway = new fabric_network_1.Gateway();
-            const connectionProfile = path.resolve(__dirname, '..', 'connection.json');
-            let connectionOptions = { wallet, identity: 'org1Admin',
-                discovery: { enabled: true, asLocalhost: true } };
-            yield gateway.connect(connectionProfile, connectionOptions);
-            // Get the network (channel) our contract is deployed to.
-            const network = yield gateway.getNetwork('mychannel');
-            // Get the contract from the network.
-            const contract = network.getContract('contract');
-            // Evaluate the specified transaction.
-            const result = yield contract.evaluateTransaction('readStation', 'S1');
-            console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
-            // Disconnect from the gateway.
-            yield gateway.disconnect();
-            return result;
-        }
-        catch (error) {
-            console.error(`Failed to submit transaction: ${error}`);
-            process.exit(1);
-        }
-    });
-}
-exports.query = query;
-query();
-//# sourceMappingURL=query.js.map
+//# sourceMappingURL=create.js.map

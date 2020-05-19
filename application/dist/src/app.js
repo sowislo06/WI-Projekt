@@ -4,12 +4,12 @@ var app = express();
 app.get('/', function (req, res) {
     res.send('Julia ist die BESTE!');
 });
-let station = require('./query.js');
+let station = require('../dist/query.js');
 app.get('/query', function (req, res) {
-    console.log('1');
-    station.query().then((response) => {
-        console.log('2');
+    station.query
+        .then((response) => {
         let carsRecord = JSON.parse(response);
+        console.log('TEST');
         res.send(carsRecord);
     });
 });
