@@ -2,7 +2,7 @@
     "name": "application",
     "version": "1.0.0",
     "description": "Demo Application implemented in TypeScript",
-    "main": "dist/index.js",
+    "main": "dist/app.js",
     "typings": "dist/index.d.ts",
     "engines": {
         "node": ">=8",
@@ -19,12 +19,14 @@
         "start": "node ./dist/create.js",
         "create": "node ./dist/create.js",
         "query": "node ./dist/query.js",
+        "startServer": "node ./dist/app.js",
         "listener": "node ./dist/listener.js"
     },
     "engineStrict": true,
     "author": "Hyperledger",
     "license": "Apache-2.0",
     "dependencies": {
+        "express": "^4.17.1",
         "fabric-network": "~1.4.0"
     },
     "devDependencies": {

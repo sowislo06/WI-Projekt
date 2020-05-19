@@ -11,5 +11,5 @@ export class Station {
 
     @Property()
     public name: string;
-
+    //TEst
 }
