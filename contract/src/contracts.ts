@@ -139,53 +139,6 @@ export class Contracts extends Contract {
         await ctx.stub.putState(stationId, buffer);
     }
 
-//END: STATION
-
-//START: Activity
-
-    @Transaction(false)
-    @Returns('boolean')
-    public async activityExists(ctx: Context, activityId: string): Promise<boolean> {
-        const buffer = await ctx.stub.getState(activityId);
-        return (!!buffer && buffer.length > 0);
-    }
-
-    @Transaction(false)
-    @Returns('Activity')
-    public async readActivity(ctx: Context, activityId: string): Promise<Activity> {
-        const exists = await this.activityExists(ctx, activityId);
-        if (!exists) {
-            throw new Error(`The activity ${activityId} does not exist`);
-        }
-        const buffer = await ctx.stub.getState(activityId);
-        const activity = JSON.parse(buffer.toString()) as Activity;
-        return activity;
-    }
-
-
-    public async createActivity(ctx: Context, activityId: string, name: string, assetId: string, stationId: string): Promise<void> {
-        
-        const existsActivity = await this.activityExists(ctx, activityId);
-        if (existsActivity) {
-            throw new Error(`The activity ${activityId} already exists`);
-        }
-
-        const activity = new Activity();
-        const asset = await this.readAsset(ctx, assetId);
-        const station = await this.readStation(ctx, stationId);
-        
-        //Aktuallisiert die Station in der Instanz des Assets
-        await this.updateStationInAsset(ctx, assetId, stationId);
-
-
-        activity.name = name;
-        activity.asset = asset;
-        activity.station = station;
-        const buffer = Buffer.from(JSON.stringify(activity));
-
-        await ctx.stub.putState(activityId, buffer);
-    }
-
     @Transaction()
     public async queryAssetsFromStation(ctx: Context, stationId: string): Promise<string> { 
         const startKey = 'ASSET0';
@@ -228,4 +181,94 @@ export class Contracts extends Contract {
     }
 
 //END: STATION
+
+//START: ACTIVITY
+
+    @Transaction(false)
+    @Returns('boolean')
+    public async activityExists(ctx: Context, activityId: string): Promise<boolean> {
+        const buffer = await ctx.stub.getState(activityId);
+        return (!!buffer && buffer.length > 0);
+    }
+
+    @Transaction(false)
+    @Returns('Activity')
+    public async readActivity(ctx: Context, activityId: string): Promise<Activity> {
+        const exists = await this.activityExists(ctx, activityId);
+        if (!exists) {
+            throw new Error(`The activity ${activityId} does not exist`);
+        }
+        const buffer = await ctx.stub.getState(activityId);
+        const activity = JSON.parse(buffer.toString()) as Activity;
+        return activity;
+    }
+
+    @Transaction()
+    public async createActivity(ctx: Context, activityId: string, name: string, assetId: string, stationId: string): Promise<void> {
+        
+        const existsActivity = await this.activityExists(ctx, activityId);
+        if (existsActivity) {
+            throw new Error(`The activity ${activityId} already exists`);
+        }
+
+        const activity = new Activity();
+        const asset = await this.readAsset(ctx, assetId);
+        const station = await this.readStation(ctx, stationId);
+        
+        //Aktuallisiert die Station in der Instanz des Assets
+        await this.updateStationInAsset(ctx, assetId, stationId);
+
+
+        activity.name = name;
+        activity.asset = asset;
+        activity.station = station;
+        const buffer = Buffer.from(JSON.stringify(activity));
+
+        await ctx.stub.putState(activityId, buffer);
+    }
+
+    @Transaction()
+    public async queryAcitvityFromAssets(ctx: Context, assetId: string): Promise<string> { 
+        const startKey = 'ACTIVITY0';
+        const endKey = 'ACTIVITY999';
+
+        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        const allResults = [];
+        while (true) {
+            const res = await iterator.next();
+            
+            const assetName = res.value.getValue().toString('utf8');
+            const asset = await this.readAsset(ctx, assetId);
+
+            //Bedingung: Asset in Activity stimmt mit der aus dem Parameter überein
+            if(assetName.includes(asset.name)){
+                if (res.value && res.value.value.toString()) {
+                    console.log(res.value.value.toString('utf8'));
+                
+    
+                    const Key = res.value.key;
+                    let Record;
+                    try {
+                        Record = JSON.parse(res.value.value.toString('utf8'));
+                    } catch (err) {
+                        console.log(err);
+                        Record = res.value.value.toString('utf8');
+                    }
+                    allResults.push({ Key, Record });
+                }
+
+            }
+            if (res.done) {
+                console.log('end of data');
+                await iterator.close();
+                console.info(allResults);
+                return JSON.stringify(allResults);
+            }
+        }
+    }
+
+    
+
+//END: ACTIVITY
 }
