@@ -79,7 +79,7 @@ function query() {
             // Get the contract from the network.
             const contract = network.getContract('contract');
             // Evaluate the specified transaction.
-            const result = yield contract.evaluateTransaction('readStation', 'S1');
+            const result = yield contract.evaluateTransaction('readStation', 'S2');
             console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
             // Disconnect from the gateway.
             yield gateway.disconnect();
