@@ -13,10 +13,11 @@ app.get('/query', function (req, res) {
 });
 //Link
 //http://localhost:3000/createCategory?key=S5&name=Stift
+let category = require('./category.js');
 app.get('/createCategory', function (req, res) {
     console.log('KEY' + req.query.key);
     console.log('NAME' + req.query.name);
-    station.createCategory(req.query.key, req.query.name).then((response) => {
+    category.createCategory(req.query.key, req.query.name).then((response) => {
         res.send(response);
     });
 });

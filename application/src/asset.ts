@@ -70,3 +70,6 @@ export async function readAsset(assetId: string) {
 
 }
 
+export async function queryAllAssets(assetId: string) {
+
+}

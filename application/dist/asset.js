@@ -28,7 +28,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readAsset = exports.createAsset = void 0;
+exports.queryAllAssets = exports.readAsset = exports.createAsset = void 0;
 const fabric_network_1 = require("fabric-network");
 const path = __importStar(require("path"));
 //ALT: main() WEG!
@@ -102,4 +102,9 @@ function readAsset(assetId) {
     });
 }
 exports.readAsset = readAsset;
+function queryAllAssets(assetId) {
+    return __awaiter(this, void 0, void 0, function* () {
+    });
+}
+exports.queryAllAssets = queryAllAssets;
 //# sourceMappingURL=asset.js.map
