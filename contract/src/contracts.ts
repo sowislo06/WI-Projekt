@@ -3,11 +3,11 @@
  */
 
 import { Context, Contract, Info, Returns, Transaction } from 'fabric-contract-api';
-import { Asset } from './asset';
-import { Category } from './category';
+import { Asset } from './models/asset';
+import { Category } from './models/category';
 import { contracts } from '.';
-import { Station } from './station';
-import { Activity } from './activity';
+import { Station } from './models/station';
+import { Activity } from './models/activity';
 
 @Info({title: 'Contracts', description: 'All Smart Contract' })
 export class Contracts extends Contract {
