@@ -5,7 +5,6 @@
 import { Context, Contract, Info, Returns, Transaction } from 'fabric-contract-api';
 import { Asset } from './models/asset';
 import { Category } from './models/category';
-import { contracts } from '.';
 import { Station } from './models/station';
 import { Activity } from './models/activity';
 
