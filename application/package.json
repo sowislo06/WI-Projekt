@@ -16,7 +16,7 @@
         "build": "tsc",
         "build:watch": "tsc -w",
         "prepublishOnly": "npm run build",
-        "start": "node ./dist/create.js",
+        "start": "node ./dist/asset.js",
         "create": "node ./dist/create.js",
         "query": "node ./dist/query.js",
         "startServer": "node ./dist/app.js",

@@ -31,10 +31,10 @@ app.get('/p', function(req, res) {
 */
 //START: ASSET
 //ALLGEMEIN
-let asset = require('./asset.js');
+let asset = require('../dist/asset.js');
 //CREATEASSET
 app.get('/createAsset', function (req, res) {
-    asset.createAsset(req.query.key, req.query.name, req.query.category, req.query.station).then((response) => {
+    asset.createAsset(req.query.key, req.query.name).then((response) => {
         res.send(response);
     });
 });

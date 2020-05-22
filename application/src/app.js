@@ -4,7 +4,7 @@ app.get('/', function (req, res) {
   res.send('Julia ist die BESTE!');
 });
 
-let station = require('./query.js');
+let station = require('./station.js');
 app.get('/query', function(req, res) {
   station.query().then((response) => {
       let carsRecord = JSON.parse(response);
@@ -30,6 +30,24 @@ app.get('/p', function(req, res) {
 // tagId is set to 5
 
 */
+
+
+//START: ASSET
+
+//ALLGEMEIN
+let asset = require('./asset.js');
+
+//CREATEASSET
+app.get('/createAsset', function(req, res) {
+  asset.createAsset(req.query.key, req.query.name, req.query.category, req.query.station).then((response) => {
+    res.send(response);
+  });
+});
+
+
+//ENDE: ASSET
+
+
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!');
 });
