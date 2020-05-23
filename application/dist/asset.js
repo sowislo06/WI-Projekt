@@ -51,7 +51,6 @@ function createAsset(assetId, assetName, category, station) {
             // Get the contract from the network.
             const contract = network.getContract('contract');
             // Submit the specified transaction.
-            // createCategory transaction - requires 2 args , ex: ('changeCarOwner', 'CAR10', 'Dave')
             yield contract.submitTransaction('createAsset', assetId, assetName, category, station);
             console.log('Transaction has been submitted');
             // Disconnect from the gateway.
