@@ -187,6 +187,8 @@ export class Contracts extends Contract {
     @Returns('boolean')
     public async activityExists(ctx: Context, activityId: string): Promise<boolean> {
         const buffer = await ctx.stub.getState(activityId);
+
+
         return (!!buffer && buffer.length > 0);
     }
 
@@ -270,4 +272,46 @@ export class Contracts extends Contract {
     
 
 //END: ACTIVITY
+
+
+//START: USERMANAGEMENT
+
+    /**
+      * getCurrentUserId
+      * To be called by application to get the type for a user who is logged in
+      *
+      * @param {Context} ctx the transaction context
+      * Usage:  getCurrentUserId ()
+     */
+    @Transaction()
+    public async getCurrentUserId(ctx: Context): Promise<string> {
+        let id = [];
+        id.push(ctx.clientIdentity.getID());
+        var begin = id[0].indexOf("/CN=");
+        var end = id[0].lastIndexOf("::/C=");
+        let userid = id[0].substring(begin + 4, end);
+        return userid;
+    }
+
+    /**
+      * getCurrentUserType
+      * To be called by application to get the type for a user who is logged in
+      *
+      * @param {Context} ctx the transaction context
+      * Usage:  getCurrentUserType ()
+    */
+    @Transaction()
+    async getCurrentUserType(ctx: Context): Promise<string> {
+
+        let userid = await this.getCurrentUserId(ctx);
+
+        //  check user id;  if admin, return type = admin;
+        //  else return value set for attribute "type" in certificate;
+        if (userid == "admin") {
+            return userid;
+        }
+        return ctx.clientIdentity.getAttributeValue("usertype");
+    }
+
+//END: USERMANAGEMENT
 }

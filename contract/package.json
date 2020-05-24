@@ -1,6 +1,6 @@
 {
   "name": "contract",
-  "version": "0.0.055",
+  "version": "0.0.066",
   "description": "Smart Contract for IS-Project",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
