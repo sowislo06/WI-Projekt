@@ -31,11 +31,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUser = exports.enrollUser = exports.registerUser = void 0;
+exports.setUserContext = exports.isUserEnrolled = exports.getUser = exports.enrollUser = exports.registerUser = void 0;
 const fabric_network_1 = require("fabric-network");
 const path = __importStar(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const fabric_ca_client_1 = __importDefault(require("fabric-ca-client"));
+var network;
+var contract;
 function registerUser(userid, userpwd, usertype) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -160,10 +162,6 @@ exports.enrollUser = enrollUser;
 //  Purpose: get specific registered user
 function getUser(userid, adminIdentity) {
     return __awaiter(this, void 0, void 0, function* () {
-        //console.log(">>>getUser...");
-        //const gateway = new Gateway();
-        // Connect to gateway as admin
-        //await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: bLocalHost } });
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'Org1Wallet');
         const wallet = new fabric_network_1.FileSystemWallet(walletPath);
@@ -194,5 +192,58 @@ function getUser(userid, adminIdentity) {
     });
 } //  end of function getUser
 exports.getUser = getUser;
-this.getUser("TESTUSERIII", "test");
+function isUserEnrolled(userid) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Create a new file system based wallet for managing identities.
+        const walletPath = path.join(process.cwd(), 'Org1Wallet');
+        const wallet = new fabric_network_1.FileSystemWallet(walletPath);
+        console.log(`Wallet path: ${walletPath}`);
+        console.log(`Yes`);
+        return wallet.exists(userid).then(result => {
+            console.log(result);
+            return result;
+        }, error => {
+            console.log("error in wallet.exists\n" + error.toString());
+            throw error;
+        });
+    });
+}
+exports.isUserEnrolled = isUserEnrolled;
+function setUserContext(userid, pwd) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('\n>>>setUserContext...');
+        // Create a new file system based wallet for managing identities.
+        const walletPath = path.join(process.cwd(), 'Org1Wallet');
+        const wallet = new fabric_network_1.FileSystemWallet(walletPath);
+        console.log(`Wallet path: ${walletPath}`);
+        // Create a new gateway for connecting to our peer node.
+        const gateway = new fabric_network_1.Gateway();
+        const connectionProfile = path.resolve(__dirname, '..', 'connection.json');
+        let connectionOptions = { wallet, identity: userid,
+            discovery: { enabled: true, asLocalhost: true } };
+        yield gateway.connect(connectionProfile, connectionOptions);
+        // Verify if user is already enrolled
+        const userExists = yield wallet.exists(userid);
+        if (!userExists) {
+            console.log("An identity for the user: " + userid + " does not exist in the wallet");
+            console.log('Enroll user before retrying');
+            throw ("Identity does not exist for userid: " + userid);
+        }
+        try {
+            // Connect to gateway using application specified parameters
+            console.log('Connect to Fabric gateway with userid:' + userid);
+            //let userGateway = new Gateway();
+            //await userGateway.connect(ccp, { identity: userid, wallet: wallet, discovery: { enabled: true, asLocalhost: bLocalHost } });
+            network = yield gateway.getNetwork("mychannel");
+            contract = yield network.getContract("contract");
+            console.log(contract);
+            return contract;
+        }
+        catch (error) {
+            throw (error);
+        }
+    });
+} //  end of setUserContext(userid)
+exports.setUserContext = setUserContext;
+this.setUserContext("TESTUSERIII", "userpwd");
 //# sourceMappingURL=util.js.map

@@ -4,6 +4,8 @@ import fs from 'fs';
 import FabricCAServices from 'fabric-ca-client';
 
 
+var network;
+var contract;
 
 export async function registerUser(userid, userpwd, usertype) {
     try {
@@ -142,10 +144,6 @@ export async function enrollUser(userid, userpwd, usertype) {
 //  function getUser
 //  Purpose: get specific registered user
 export async function getUser (userid, adminIdentity) {
-    //console.log(">>>getUser...");
-    //const gateway = new Gateway();
-    // Connect to gateway as admin
-    //await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: bLocalHost } });
     
     // Create a new file system based wallet for managing identities.
     const walletPath = path.join(process.cwd(), 'Org1Wallet');
@@ -177,5 +175,60 @@ export async function getUser (userid, adminIdentity) {
     return Promise.resolve(result);
 }  //  end of function getUser
 
+export async function isUserEnrolled (userid) {
+    
+    // Create a new file system based wallet for managing identities.
+    const walletPath = path.join(process.cwd(), 'Org1Wallet');
+    const wallet = new FileSystemWallet(walletPath);
+    console.log(`Wallet path: ${walletPath}`);
+    console.log(`Yes`);
+    
+    return wallet.exists(userid).then(result => {
+        console.log(result);
+        return result;
+    }, error => {
+        console.log("error in wallet.exists\n" + error.toString());
+        throw error;
+    });
+}
 
-this.getUser("TESTUSERIII", "test");
+export async function setUserContext (userid, pwd) {
+    console.log('\n>>>setUserContext...');
+
+    // Create a new file system based wallet for managing identities.
+    const walletPath = path.join(process.cwd(), 'Org1Wallet');
+    const wallet = new FileSystemWallet(walletPath);
+    console.log(`Wallet path: ${walletPath}`);
+    // Create a new gateway for connecting to our peer node.
+    const gateway = new Gateway();
+    const connectionProfile = path.resolve(__dirname, '..', 'connection.json');
+    let connectionOptions = { wallet, identity: userid,
+    discovery: { enabled: true, asLocalhost: true }};
+    await gateway.connect(connectionProfile, connectionOptions);
+     
+
+
+    // Verify if user is already enrolled
+    const userExists = await wallet.exists(userid);
+    if (!userExists) {
+        console.log("An identity for the user: " + userid + " does not exist in the wallet");
+        console.log('Enroll user before retrying');
+        throw ("Identity does not exist for userid: " + userid);
+    }
+
+    try {
+        // Connect to gateway using application specified parameters
+        console.log('Connect to Fabric gateway with userid:' + userid);
+        //let userGateway = new Gateway();
+        //await userGateway.connect(ccp, { identity: userid, wallet: wallet, discovery: { enabled: true, asLocalhost: bLocalHost } });
+
+        network = await gateway.getNetwork("mychannel");
+        contract = await network.getContract("contract");
+        console.log(contract);
+        return contract;
+    }
+    catch (error) { throw (error); }
+}  //  end of setUserContext(userid)
+
+
+this.setUserContext("TESTUSERIII", "userpwd");
