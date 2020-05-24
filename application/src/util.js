@@ -3,8 +3,11 @@ import * as path from 'path';
 import fs from 'fs';
 import FabricCAServices from 'fabric-ca-client';
 
+
+
 export async function registerUser(userid, userpwd, usertype) {
     try {
+
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'Org1Wallet');
         const wallet = new FileSystemWallet(walletPath);
@@ -28,9 +31,9 @@ export async function registerUser(userid, userpwd, usertype) {
          const caURL = CAs[fabricCAKey].url;
          const ca = new FabricCAServices(caURL, {  trustedRoots: [], verify: false });
 
-         
 
-         
+   
+
 
         //Create User JSON Object
         var newUserDetails = {
@@ -134,4 +137,45 @@ export async function enrollUser(userid, userpwd, usertype) {
         process.exit(1);
     }
 }
-this.enrollUser("TESTUSERII", "userpwd", "test");
+
+
+//  function getUser
+//  Purpose: get specific registered user
+export async function getUser (userid, adminIdentity) {
+    //console.log(">>>getUser...");
+    //const gateway = new Gateway();
+    // Connect to gateway as admin
+    //await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: bLocalHost } });
+    
+    // Create a new file system based wallet for managing identities.
+    const walletPath = path.join(process.cwd(), 'Org1Wallet');
+    const wallet = new FileSystemWallet(walletPath);
+    console.log(`Wallet path: ${walletPath}`);
+    // Create a new gateway for connecting to our peer node.
+    const gateway = new Gateway();
+    const connectionProfile = path.resolve(__dirname, '..', 'connection.json');
+    let connectionOptions = { wallet, identity: 'admin',
+    discovery: { enabled: true, asLocalhost: true }};
+    await gateway.connect(connectionProfile, connectionOptions);
+    
+    
+    let client = gateway.getClient();
+    let fabric_ca_client = client.getCertificateAuthority();
+    let idService = fabric_ca_client.newIdentityService();
+    let user = await idService.getOne(userid, gateway.getCurrentIdentity());
+    let result = {"id": userid};
+
+    // for admin, usertype is "admin";
+    if (userid == "admin") {
+        result.usertype = userid;
+    } else { // look through user attributes for "usertype"
+        let j = 0;
+        while (user.result.attrs[j].name !== "usertype") j++;
+            result.usertype = user.result.attrs[j].value;
+    }
+    console.log (result);
+    return Promise.resolve(result);
+}  //  end of function getUser
+
+
+this.getUser("TESTUSERIII", "test");

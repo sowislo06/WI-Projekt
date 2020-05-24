@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.enrollUser = exports.registerUser = void 0;
+exports.getUser = exports.enrollUser = exports.registerUser = void 0;
 const fabric_network_1 = require("fabric-network");
 const path = __importStar(require("path"));
 const fs_1 = __importDefault(require("fs"));
@@ -156,5 +156,43 @@ function enrollUser(userid, userpwd, usertype) {
     });
 }
 exports.enrollUser = enrollUser;
-this.enrollUser("TESTUSERII", "userpwd", "test");
+//  function getUser
+//  Purpose: get specific registered user
+function getUser(userid, adminIdentity) {
+    return __awaiter(this, void 0, void 0, function* () {
+        //console.log(">>>getUser...");
+        //const gateway = new Gateway();
+        // Connect to gateway as admin
+        //await gateway.connect(ccp, { wallet, identity: adminIdentity, discovery: { enabled: false, asLocalhost: bLocalHost } });
+        // Create a new file system based wallet for managing identities.
+        const walletPath = path.join(process.cwd(), 'Org1Wallet');
+        const wallet = new fabric_network_1.FileSystemWallet(walletPath);
+        console.log(`Wallet path: ${walletPath}`);
+        // Create a new gateway for connecting to our peer node.
+        const gateway = new fabric_network_1.Gateway();
+        const connectionProfile = path.resolve(__dirname, '..', 'connection.json');
+        let connectionOptions = { wallet, identity: 'admin',
+            discovery: { enabled: true, asLocalhost: true } };
+        yield gateway.connect(connectionProfile, connectionOptions);
+        let client = gateway.getClient();
+        let fabric_ca_client = client.getCertificateAuthority();
+        let idService = fabric_ca_client.newIdentityService();
+        let user = yield idService.getOne(userid, gateway.getCurrentIdentity());
+        let result = { "id": userid };
+        // for admin, usertype is "admin";
+        if (userid == "admin") {
+            result.usertype = userid;
+        }
+        else { // look through user attributes for "usertype"
+            let j = 0;
+            while (user.result.attrs[j].name !== "usertype")
+                j++;
+            result.usertype = user.result.attrs[j].value;
+        }
+        console.log(result);
+        return Promise.resolve(result);
+    });
+} //  end of function getUser
+exports.getUser = getUser;
+this.getUser("TESTUSERIII", "test");
 //# sourceMappingURL=util.js.map
