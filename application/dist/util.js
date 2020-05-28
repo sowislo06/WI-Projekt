@@ -245,5 +245,7 @@ function setUserContext(userid, pwd) {
     });
 } //  end of setUserContext(userid)
 exports.setUserContext = setUserContext;
-this.setUserContext("TESTUSERIII", "userpwd");
+//this.registerUser("JuliusII", "test", "JuliusType");
+//this.enrollUser("Julius", "test", "JuliusType");
+this.getUser("Julius");
 //# sourceMappingURL=util.js.map
