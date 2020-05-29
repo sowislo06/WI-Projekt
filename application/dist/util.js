@@ -247,5 +247,6 @@ function setUserContext(userid, pwd) {
 exports.setUserContext = setUserContext;
 //this.registerUser("JuliusII", "test", "JuliusType");
 //this.enrollUser("Julius", "test", "JuliusType");
+//this.enrollUser("JuliusII", "test", "JuliusType");
 this.getUser("Julius");
 //# sourceMappingURL=util.js.map
