@@ -231,7 +231,7 @@ export async function setUserContext (userid, pwd) {
     catch (error) { throw (error); }
 }  //  end of setUserContext(userid)
 
-//this.registerUser("JuliusII", "test", "JuliusType");
-//this.enrollUser("Julius", "test", "JuliusType");
-//this.enrollUser("JuliusII", "test", "JuliusType");
-//this.getUser("Julius");
+this.registerUser("JuliusII", "test", "JuliusType");
+this.enrollUser("Julius", "test", "JuliusType");
+this.enrollUser("JuliusII", "test", "JuliusType");
+this.getUser("Julius");
